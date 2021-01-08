@@ -73,6 +73,46 @@ router.get('/isUserAuth', verifyJWT, function(req, res, next) {
   }
 });
 
+router.get('/getCategories', function(req, res) {
+  db.query(
+    "SELECT * from category_identification",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        res.send({message: "Error Occured!"});
+      } else {
+        res.json({result})
+      }
+    });
+});
+
+router.get('/getOrg', function(req, res) {
+  db.query(
+    "SELECT org_name from organization",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        res.send({message: "Error Occured!"});
+      } else {
+        res.json({result})
+      }
+    });
+});
+
+router.post('/insertCategory', function(req, res) {
+  category = req.body.category;
+  db.query(
+    "insert into category (category, subcategory) values (?, ?)", category, category,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        res.send({message: "Error Occured!"});
+      } else {
+        res.json({result})
+      }
+    });
+});
+
 // router.get('/isUserAuth', verifyJWT, (req, res) => {
 //   res.send("you are authenticated!");
 // });
