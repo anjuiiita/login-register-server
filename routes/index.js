@@ -150,4 +150,57 @@ router.post('/login', function(req, res) {
   );
 });
 
+
+router.post('/getCardDetails', function(req, res) {
+  category = req.body.category;
+  sub_category = req.body.sub_category;
+  ss_category = req.body.ss_category;
+  level = req.body.level;
+  db.query(
+    "Select category_id from category_identification where (category=? OR ? IS NULL) and (sub_category=? OR ? IS NULL) and (ss_category=? OR ? IS NULL) and (level=? OR ? IS NULL)", 
+    [category, category, sub_category, sub_category, ss_category, ss_category, level, level],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        res.send({message: "Error Occured!"});
+      }
+      table = category.split(' ').join('_');
+      query = 'Select curricula_id from ' + table;
+      if (result.length > 0) {
+        query += ' where ';
+      }
+      for(let i = 0; i < result.length; i++) { 
+        query += result[i].category_id + ' IS NOT NULL'
+        if (i != result.length - 1) {
+          query += ' OR '
+        }
+      }
+        
+      db.query(
+        query,
+        (err, result1) => {
+          if (err) {
+            console.log(err);
+            res.send({message: "Error Occured!"});
+          }
+          curricula_id_list = []
+          for (var key in result1) {
+              curricula_id_list.push(result1[key].curricula_id);
+          }
+
+          db.query(
+            "Select * from curricula where curricula_id IN ?", [[curricula_id_list]],
+            (err, result2) => {
+              if (err) {
+                res.send({message: "Error Occured!"});
+              } 
+              res.send(result2);
+            }
+          )
+        }
+      )
+    }
+  )
+})
+
 module.exports = router;
